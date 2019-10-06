@@ -66,12 +66,12 @@ func TestMultiWait(t *testing.T) {
 	go func() {
 		defer waitgroup.Done()
 		w.Wait(time.Second * 2)
-		println("Done 1")
+		// println("Done 1")
 	}()
 	go func() {
 		defer waitgroup.Done()
 		w.Wait(time.Second * 2)
-		println("Done 2")
+		// println("Done 2")
 	}()
 	n := time.Now()
 	time.Sleep(1 * time.Second)
