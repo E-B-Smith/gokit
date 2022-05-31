@@ -15,19 +15,15 @@ import (
 )
 
 func TestCompileTime(t *testing.T) {
-	if CompileVersion() == "0.0.0" && CompileTimeString() == "compile time not set" {
-		t.Log("Compile time and versin not set in linker. Skipping.")
-		return
-	}
 	if CompileVersion() == "0.0.0" {
 		t.Errorf("CompileVersion not set.")
 	}
 	if CompileTimeString() == "compile time not set" {
 		t.Errorf("CompileTime not set.")
 	}
-	compileTime = "Mon-Aug-19-13:22:52-UTC-2019"
+	compileTime = "2019-08-19-13-22-52Z"
 	ct := time.Date(2019, 8, 19, 13, 22, 52, 0, time.UTC)
 	if !CompileTime().Equal(ct) {
-		t.Errorf("Dates not equal\n%+v\n%+v.", CompileTime(), ct)
+		t.Errorf("Dates not equal\n%+v\n%s\n%+v.", CompileTime(), compileTime, ct)
 	}
 }

@@ -22,6 +22,7 @@ func TestLogRotation(t *testing.T) {
 	SetTeeStderr(false)
 	SetLogLevel(LevelAll)
 	logRotationInterval = time.Second * 2
+	logRetentionCount = 100
 	SetFilename("log/TestLog.log")
 
 	Infof("Starting test.")
@@ -46,7 +47,7 @@ func BeginPipeToString() {
 	tempOut = os.Stderr
 	pipeRead, pipeWrite, _ = os.Pipe()
 	channel = make(chan string)
-	// copy the output in a separate goroutine so printing can't block indefinitely
+	// Copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
 		io.Copy(&buf, pipeRead)
@@ -87,7 +88,7 @@ func TestLogStackWithError(t *testing.T) {
 
 func TestPrettyStackString(t *testing.T) {
 	s := PrettyStackString(0)
-	r := "log.go:340\nlog_test.go:89\ntesting.go:865\nasm_amd64.s:1337\n"
+	r := "log.go:340\nlog_test.go:90\ntesting.go:1123\nasm_amd64.s:1374\n"
 	if s != r {
 		t.Errorf("Expected\n%s\nbut found\n%s.", r, s)
 	}

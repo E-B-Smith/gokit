@@ -107,6 +107,9 @@ var (
 	// LogRotationInterval sets how often the log file will be rotated.
 	logRotationInterval = time.Hour * 24.0
 
+	// Number of old log files to keep
+	logRetentionCount = 1
+
 	logWriter       io.WriteCloser = os.Stderr
 	logFilename     string
 	logRotationTime time.Time
@@ -166,10 +169,7 @@ func absolutePath(filename string) string {
 }
 
 func closeLogFile() {
-	_, hasClose := logWriter.(interface{ Close() })
-	if hasClose &&
-		logWriter != os.Stderr &&
-		logWriter != os.Stdout {
+	if logWriter != os.Stderr && logWriter != os.Stdout {
 		logWriter.Close()
 	}
 }
@@ -288,11 +288,11 @@ func rotateLogFile() {
 		return
 	}
 
-	//  Keep the newest 7 --
+	//  Keep the newest logRetentionCount --
 
 	sortedLogfiles := sort.StringSlice(logfiles)
 	sortedLogfiles.Sort()
-	for i := 0; i < len(sortedLogfiles)-7; i++ {
+	for i := 0; i < len(sortedLogfiles)-logRetentionCount; i++ {
 		Infof("Removing old log '%s'.", sortedLogfiles[i])
 		error = os.Remove(sortedLogfiles[i])
 		if error != nil {
@@ -329,8 +329,8 @@ func LogStackWithError(error interface{}) {
 	trace := make([]byte, 64000)
 	count := runtime.Stack(trace, false)
 	s := trace[:count]
-	logRaw(LevelError, "'%v'.", error)
-	logRaw(LevelError, "Stack of %d bytes: %s.", count, s)
+	logRaw(LevelError, 2, "'%v'.", error)
+	logRaw(LevelError, 2, "Stack of %d bytes: %s.", count, s)
 }
 
 // PrettyStackString returns a prettyfied string of the current stack. The `skip` parameter indicates
@@ -362,7 +362,7 @@ func CurrentFunctionName() string {
 func LogFunctionName() {
 	pc, _, _, _ := runtime.Caller(1)
 	funcname := path.Base(runtime.FuncForPC(pc).Name())
-	Debugf("Function %s.", funcname)
+	logRaw(LevelDebug, 2, "Function %s.", funcname)
 }
 
 // FlushMessages flushes all outstanding log messages to the log file.
@@ -373,7 +373,9 @@ func FlushMessages() {
 	openLogFile()
 }
 
-func logRaw(logLevel Level, format string, args ...interface{}) {
+// logRaw logs a raw messgae.
+// stackDepth is the depth in the stack to where the calling source code / line number should be billed.
+func logRaw(logLevel Level, stackDepth int, format string, args ...interface{}) {
 
 	LevelNames := []string{
 		"Inval",
@@ -394,12 +396,15 @@ func logRaw(logLevel Level, format string, args ...interface{}) {
 		logLevel = LevelError
 	}
 
-	_, filename, linenumber, _ := runtime.Caller(2)
-	filename = path.Base(filename)
+	var dirname string
+	_, filename, linenumber, _ := runtime.Caller(stackDepth)
+	dirname, filename = path.Split(filename)
+	dirname = path.Base(dirname)
 	i := len(filename)
 	if i > 26 {
 		i = 26
 	}
+	filename = dirname + "/" + filename[:i]
 
 	itemTime := time.Now()
 	if itemTime.After(logRotationTime) {
@@ -412,7 +417,7 @@ func logRaw(logLevel Level, format string, args ...interface{}) {
 	message = fmt.Sprintf(
 		"%s %26s:%-4d %s: %s\n",
 		itemTime.Format(time.RFC3339),
-		filename[:i],
+		filename,
 		linenumber,
 		LevelNames[logLevel],
 		message,
@@ -424,22 +429,22 @@ func logRaw(logLevel Level, format string, args ...interface{}) {
 }
 
 // Debugf writes a debug level message to the log.
-func Debugf(format string, args ...interface{}) { logRaw(LevelDebug, format, args...) }
+func Debugf(format string, args ...interface{}) { logRaw(LevelDebug, 2, format, args...) }
 
 // Startf writes a start level message to the log.
-func Startf(format string, args ...interface{}) { logRaw(LevelStart, format, args...) }
+func Startf(format string, args ...interface{}) { logRaw(LevelStart, 2, format, args...) }
 
 // Exitf writes an exit level message to the log.
-func Exitf(format string, args ...interface{}) { logRaw(LevelExit, format, args...) }
+func Exitf(format string, args ...interface{}) { logRaw(LevelExit, 2, format, args...) }
 
 // Infof writes an info level message to the log.
-func Infof(format string, args ...interface{}) { logRaw(LevelInfo, format, args...) }
+func Infof(format string, args ...interface{}) { logRaw(LevelInfo, 2, format, args...) }
 
 // Warningf writes a warning level message to the log.
-func Warningf(format string, args ...interface{}) { logRaw(LevelWarning, format, args...) }
+func Warningf(format string, args ...interface{}) { logRaw(LevelWarning, 2, format, args...) }
 
 // Errorf writes a error level message to the log.
-func Errorf(format string, args ...interface{}) { logRaw(LevelError, format, args...) }
+func Errorf(format string, args ...interface{}) { logRaw(LevelError, 2, format, args...) }
 
 // Error Writes a error message to the log.
-func Error(error error) { logRaw(LevelError, "%v.", error) }
+func Error(error error) { logRaw(LevelError, 2, "%v.", error) }

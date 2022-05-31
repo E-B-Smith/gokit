@@ -22,7 +22,7 @@ func CompileTimeString() string { return compileTime }
 
 // CompileTime returns the timestamp of the code when the code was compiled. This is set in an extra link step.
 func CompileTime() time.Time {
-	// Mon-Aug-19-13:22:52-PDT-2019
-	t, _ := time.Parse("Mon-Jan-2-15:04:05-MST-2006", compileTime)
+	// Like: 2020-02-03-16-02-44-0800 for January 3, 2020 4:02:44 PST
+	t, _ := time.Parse("2006-01-02-15-04-05Z0700", compileTime)
 	return t
 }
