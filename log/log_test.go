@@ -12,18 +12,49 @@ package log
 import (
 	"bytes"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
+
+var tempLogBaseName = ""
+
+func testLogFileName(t *testing.T) string {
+	if tempLogBaseName != "" {
+		return tempLogBaseName
+	}
+	tempLogBaseName, err := ioutil.TempDir("", "log_test")
+	if err != nil {
+		t.Error("Can't make a temporary directory 'log_test'.")
+	}
+	tempLogBaseName += "/TestLog.log"
+	return tempLogBaseName
+}
+
+func removeFileExtension(fileName string) string {
+	if pos := strings.LastIndexByte(fileName, '.'); pos != -1 {
+		return fileName[:pos]
+	}
+	return fileName
+}
+
+func TestLogFileName(t *testing.T) {
+	filename := testLogFileName(t)
+	if !strings.HasPrefix(filename, "/") || !strings.HasSuffix(filename, "/TestLog.log") {
+		t.Errorf("Invalid file name %s.", filename)
+	}
+}
 
 func TestLogRotation(t *testing.T) {
 	SetTeeStderr(false)
 	SetLogLevel(LevelAll)
 	logRotationInterval = time.Second * 2
 	logRetentionCount = 100
-	SetFilename("log/TestLog.log")
+	logfilename := testLogFileName(t)
+	SetFilename(logfilename)
 
 	Infof("Starting test.")
 	sleepTime, _ := time.ParseDuration("0.2s")
@@ -33,7 +64,8 @@ func TestLogRotation(t *testing.T) {
 	}
 	SetTeeStderr(false)
 	SetFilename("")
-	logfiles, _ := filepath.Glob("log/TestLog*")
+	globname := removeFileExtension(logfilename)
+	logfiles, _ := filepath.Glob(globname + "*")
 	if len(logfiles) != 6 {
 		t.Errorf("Expected 6 files, found %d.", len(logfiles))
 	}
@@ -88,7 +120,7 @@ func TestLogStackWithError(t *testing.T) {
 
 func TestPrettyStackString(t *testing.T) {
 	s := PrettyStackString(0)
-	r := "log.go:340\nlog_test.go:90\ntesting.go:1123\nasm_amd64.s:1374\n"
+	r := "log.go:340\nlog_test.go:122\ntesting.go:1123\nasm_amd64.s:1374\n"
 	if s != r {
 		t.Errorf("Expected\n%s\nbut found\n%s.", r, s)
 	}
@@ -97,15 +129,18 @@ func TestPrettyStackString(t *testing.T) {
 func RemoveLogFiles(t *testing.T) {
 	SetTeeStderr(false)
 	SetFilename("")
-	logfiles, _ := filepath.Glob("log/TestLog*")
+
+	logfilename := testLogFileName(t)
+	logfilename = filepath.Dir(logfilename)
+	logfiles, _ := filepath.Glob(logfilename + "/*")
 	for _, file := range logfiles {
 		error := os.Remove(file)
 		if error != nil {
 			t.Errorf("Can't remove log file '%s': %v.", file, error)
 		}
 	}
-	error := os.Remove("log")
+	error := os.Remove(logfilename)
 	if error != nil {
-		t.Errorf("Can't remove log directory '%s': %v.", "log", error)
+		t.Errorf("Can't remove log directory '%s': %v.", logfilename, error)
 	}
 }
