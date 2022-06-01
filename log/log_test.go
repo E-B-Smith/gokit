@@ -120,7 +120,7 @@ func TestLogStackWithError(t *testing.T) {
 
 func TestPrettyStackString(t *testing.T) {
 	s := PrettyStackString(0)
-	r := "log.go:340\nlog_test.go:122\ntesting.go:1123\nasm_amd64.s:1374\n"
+	r := "log.go:340\nlog_test.go:122\ntesting.go:1439\nasm_amd64.s:1571\n"
 	if s != r {
 		t.Errorf("Expected\n%s\nbut found\n%s.", r, s)
 	}
