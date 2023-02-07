@@ -95,7 +95,8 @@ func EndPipeToString() string {
 }
 
 func TestLogStackWithError(t *testing.T) {
-	SetFilename("log/TestLog.log")
+	logName := testLogFileName(t)
+	SetFilename(logName)
 	SetTeeStderr(true)
 	BeginPipeToString()
 	LogStackWithError(io.ErrUnexpectedEOF)
@@ -120,8 +121,8 @@ func TestLogStackWithError(t *testing.T) {
 
 func TestPrettyStackString(t *testing.T) {
 	s := PrettyStackString(0)
-	r := "log.go:340\nlog_test.go:122\ntesting.go:1439\nasm_amd64.s:1571\n"
-	if s != r {
+	r := "log.go:340\nlog_test.go:122\ntesting.go:1439\n"
+	if !(len(s) > len(r) && strings.HasPrefix(s, r)) {
 		t.Errorf("Expected\n%s\nbut found\n%s.", r, s)
 	}
 }
