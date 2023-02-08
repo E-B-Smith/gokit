@@ -15,6 +15,9 @@ import (
 	"reflect"
 	"strings"
 	"unicode"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // ScanInterface scans the input into a the passed interface.
@@ -160,6 +163,10 @@ func enumFromString(s string, enumValues string) (int64, error) {
 	return -1, fmt.Errorf("Invalid enum '%s'", s)
 }
 
+func titleCased(s string) string {
+	return cases.Title(language.Und, cases.NoLower).String(s)
+}
+
 // CamelCaseFromIdentifier transforms a snake case identifier into a camel case identifier.
 func CamelCaseFromIdentifier(s string) string {
 
@@ -208,14 +215,12 @@ func CamelCaseFromIdentifier(s string) string {
 
 	var camelString string
 	for _, part := range words {
-
 		part = strings.ToLower(part)
 		if _, ok := upperWords[part]; ok {
 			part = strings.ToUpper(part)
 		} else {
-			part = strings.Title(part)
+			part = titleCased(part)
 		}
-
 		camelString += part
 	}
 

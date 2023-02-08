@@ -12,7 +12,6 @@ package log
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,7 +25,7 @@ func testLogFileName(t *testing.T) string {
 	if tempLogBaseName != "" {
 		return tempLogBaseName
 	}
-	tempLogBaseName, err := ioutil.TempDir("", "log_test")
+	tempLogBaseName, err := os.MkdirTemp("", "log_test")
 	if err != nil {
 		t.Error("Can't make a temporary directory 'log_test'.")
 	}
@@ -121,7 +120,7 @@ func TestLogStackWithError(t *testing.T) {
 
 func TestPrettyStackString(t *testing.T) {
 	s := PrettyStackString(0)
-	r := "log.go:340\nlog_test.go:123\ntesting.go:1439\n"
+	r := "log.go:314\nlog_test.go:122\ntesting.go:"
 	if !(len(s) > len(r) && strings.HasPrefix(s, r)) {
 		t.Errorf("Expected\n%s\nbut found\n%s.", r, s)
 	}

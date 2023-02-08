@@ -19,7 +19,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"os/user"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -141,31 +140,6 @@ func TeeStderr() bool {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	return teeStderr
-}
-
-func homePath() string {
-	homepath := ""
-	u, error := user.Current()
-	if error == nil {
-		homepath = u.HomeDir
-	} else {
-		homepath = os.Getenv("HOME")
-	}
-	return homepath
-}
-
-func absolutePath(filename string) string {
-	filename = strings.TrimSpace(filename)
-	if filepath.HasPrefix(filename, "~") {
-		filename = strings.TrimPrefix(filename, "~")
-		filename = path.Join(homePath(), filename)
-	}
-	if !path.IsAbs(filename) {
-		s, _ := os.Getwd()
-		filename = path.Join(s, filename)
-	}
-	filename = path.Clean(filename)
-	return filename
 }
 
 func closeLogFile() {

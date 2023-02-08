@@ -202,6 +202,9 @@ func IsValidStringRune(r rune) bool {
 // ScanString returns a scanned string.
 func (scanner *Scanner) ScanString() (next string, error error) {
 	error = scanner.ScanSpaces()
+	if error != nil {
+		return "", error
+	}
 
 	var (
 		r      rune

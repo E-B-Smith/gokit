@@ -37,7 +37,7 @@ func HomePath() string {
 // AbsolutePath expands the filename to the absolute path of the file.
 func AbsolutePath(filename string) string {
 	filename = strings.TrimSpace(filename)
-	if filepath.HasPrefix(filename, "~") {
+	if filename == "~" || strings.HasPrefix(filename, "~/") {
 		filename = strings.TrimPrefix(filename, "~")
 		filename = path.Join(HomePath(), filename)
 	}

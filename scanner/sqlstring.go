@@ -39,7 +39,7 @@ func (scanner *Scanner) ScanSQLString() (string, error) {
 	}
 
 	var buffer bytes.Buffer
-	for true {
+	for {
 		r, _, scanner.error = scanner.reader.ReadRune()
 		if scanner.error != nil {
 			scanner.token = ""
@@ -65,6 +65,4 @@ func (scanner *Scanner) ScanSQLString() (string, error) {
 			buffer.WriteRune(r)
 		}
 	}
-	scanner.token = buffer.String()
-	return scanner.token, scanner.error
 }

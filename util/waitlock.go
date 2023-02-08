@@ -21,8 +21,8 @@ var (
 
 // WaitLock is a lock timeout lock that multiple processes can wait for a broadcast signal.
 type WaitLock struct {
-	c        chan error
-	happened bool
+	c chan error
+	// happened bool
 }
 
 // NewWaitLock returns a new WaitLock.

@@ -47,7 +47,7 @@ func CleanStringPtrFromString(s string) *string {
 func StringIncludingCharactersInSet(inputstring string, characterset string) string {
 	return strings.Map(
 		func(r rune) rune {
-			if strings.IndexRune(characterset, r) < 0 {
+			if !strings.ContainsRune(characterset, r) {
 				return -1
 			}
 			return r
@@ -59,7 +59,7 @@ func StringIncludingCharactersInSet(inputstring string, characterset string) str
 func StringExcludingCharactersInSet(inputstring string, characterset string) string {
 	return strings.Map(
 		func(r rune) rune {
-			if strings.IndexRune(characterset, r) < 0 {
+			if !strings.ContainsRune(characterset, r) {
 				return r
 			}
 			return -1
@@ -71,7 +71,7 @@ func StringExcludingCharactersInSet(inputstring string, characterset string) str
 func ReplaceCharactersNotInSetWithRune(inputstring string, characterset string, replacement rune) string {
 	return strings.Map(
 		func(r rune) rune {
-			if strings.IndexRune(characterset, r) < 0 {
+			if !strings.ContainsRune(characterset, r) {
 				return replacement
 			}
 			return r
@@ -82,9 +82,9 @@ func ReplaceCharactersNotInSetWithRune(inputstring string, characterset string, 
 // ValidatedEmailAddress does simple validation on an email address.
 func ValidatedEmailAddress(inputstring string) (string, error) {
 	inputstring = strings.TrimSpace(inputstring)
-	re := regexp.MustCompile(".+@.+\\..+")
+	re := regexp.MustCompile(`.+@.+\..+`)
 	matched := re.Match([]byte(inputstring))
-	if matched == false {
+	if !matched {
 		return "", errors.New("Invalid email address")
 	}
 	return inputstring, nil
