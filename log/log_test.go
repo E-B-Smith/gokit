@@ -121,7 +121,7 @@ func TestLogStackWithError(t *testing.T) {
 
 func TestPrettyStackString(t *testing.T) {
 	s := PrettyStackString(0)
-	r := "log.go:340\nlog_test.go:122\ntesting.go:1439\n"
+	r := "log.go:340\nlog_test.go:123\ntesting.go:1439\n"
 	if !(len(s) > len(r) && strings.HasPrefix(s, r)) {
 		t.Errorf("Expected\n%s\nbut found\n%s.", r, s)
 	}
